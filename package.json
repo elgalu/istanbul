@@ -83,7 +83,7 @@
   "scripts": {
     "pretest": "jshint index.js lib/ test/",
     "test": "node --harmony test/run.js",
-    "posttest": "node ./lib/cli.js check-coverage --statements 95 --branches 80",
+    "posttest": "node ./lib/cli.js check-coverage --statements 95 --branches 80 && && node ./lib/cli.js current-coverage --baseline 95",
     "docs": "npm install yuidocjs && node node_modules/yuidocjs/lib/cli.js ."
   },
   "bin": {
@@ -110,11 +110,11 @@
   "devDependencies": {
     "coveralls": "2.x",
     "glob": "^5.0.14",
-    "istanbul-lib-coverage": "^1.0.0-alpha",
-    "istanbul-lib-instrument": "^1.1.0-alpha",
     "jshint": "^2.8.0",
     "nodeunit": "0.9.x",
     "requirejs": "2.x",
+    "escodegen": "1.8.x",
+    "resolve": "1.1.x",
     "rimraf": "^2.4.3"
   }
 }

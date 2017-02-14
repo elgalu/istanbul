@@ -12,7 +12,6 @@ var path = require('path'),
     COVER_VAR = '$$selfcover$$',
     seq = 0,
     verbose = false,
-    libInstrument = require('istanbul-lib-instrument'),
     OPTS = {
     };
 
@@ -96,7 +95,7 @@ function runCommand(command, args, envVars, callback) {
         seq += 1;
         env.COMMAND_NAME = command || '';
         env.COMMAND_ARGS = args.join('\t');
-        env.COVERAGE_FILE = 'coverage-' + seq + '.raw.json';
+        env.COVERAGE_FILE = 'coverage-' + seq + '.json';
         env.LAZY_HOOK = OPTS.lazyHook ? '1' : '';
         args = [ __filename ];
     } else {
@@ -150,7 +149,8 @@ function runCommand(command, args, envVars, callback) {
 }
 
 function customHook(lazyHook, callback) {
-    var instrumenter = libInstrument.createInstrumenter({ coverageVariable: COVER_VAR }),
+    var Instrumenter = require('../lib/instrumenter'),
+        instrumenter = new Instrumenter({ coverageVariable: COVER_VAR }),
         transformer = function (file) {
             return instrumenter.instrumentSync(fs.readFileSync(file, 'utf8'), file);
         },
@@ -164,7 +164,7 @@ function customHook(lazyHook, callback) {
             });
         };
 
-    require('istanbul-api').matcherFor({ root : COVER_ROOT, excludes: EXCLUDES, includes: [ '**/*.js'] }, function (err, matcher) {
+    require('../lib/util/file-matcher').matcherFor({ root : COVER_ROOT, excludes: EXCLUDES, includes: [ '**/*.js'] }, function (err, matcher) {
         var added = false;
 
         Module._extensions['.js'] = function (module, filename) {

@@ -5,9 +5,9 @@ check:
     branches: 40
     lines: 40
   each:
-    statements: 79
+    statements: 72
     functions: 50
-    branches: 79
-    lines: 79
+    branches: 72
+    lines: 72
     excludes:
         - lib/bar.js # 40, 0, 40, 0

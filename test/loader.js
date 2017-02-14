@@ -17,15 +17,18 @@ function loadDirTests(dir, pat) {
 function runTests(pat, reporter, opts, callback) {
     var files,
         files2,
-        files3;
+        files3,
+        files4;
 
     pat = pat || /(.*)+\.js$/;
     if (typeof pat === 'string') { pat = new RegExp(pat); }
-    files = [];
+    files = loadDirTests('instrumentation', pat);
     files2 = loadDirTests('other', pat);
     files3 = loadDirTests('cli', pat);
+    files4 = loadDirTests('browser', pat);
     files.push.apply(files, files2);
     files.push.apply(files, files3);
+    files.push.apply(files, files4);
     reporter.run(files, opts, callback);
 }
 

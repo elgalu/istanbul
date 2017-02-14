@@ -35,10 +35,7 @@ var nodeunit = require('nodeunit'),
     child_process = require('child_process'),
     rimraf = require('rimraf'),
     common = require('./common'),
-    cliHelper = require('./cli-helper'),
-    Reporter = require('istanbul-api/lib/reporter'),
-    libCoverage = require('istanbul-lib-coverage'),
-    configuration = require('istanbul-api').config;
+    cliHelper = require('./cli-helper');
 
 function runTests(pat, forceCover) {
     var defaultReporter = nodeunit.reporters['default'],
@@ -52,7 +49,7 @@ function runTests(pat, forceCover) {
         //if any test failed then we cannot obviously run self-coverage
         if (err) { throw err; }
         if (selfCover) {
-            //delete the build dir
+            //delet the build dir
             rimraf.sync(common.getBuildDir());
             //set up environment variable to set CLI and browser
             //tests know that they need to run in self-cover mode
@@ -74,7 +71,7 @@ function runTests(pat, forceCover) {
                 '--x',
                 '**/test/**',
                 '--x',
-                '**/public/**',
+                '**/yui-load-hook.js',
                 path.resolve(__dirname, 'run-again.js'),
                 '--',
                 pat || ''
@@ -87,18 +84,20 @@ function runTests(pat, forceCover) {
                 if (exitCode !== 0) {
                     throw new Error('self-cover returned exit code [' + exitCode + ']');
                 }
-                var map = libCoverage.createCoverageMap(),
-                    reports = [ 'lcov', 'text-summary', 'text'],
-                    cfg = configuration.loadObject({ reporting: { dir: coverageDir }}),
-                    reporter;
-                reporter = new Reporter(cfg);
-                reporter.addAll(reports);
+                var Collector = require('../lib/collector'),
+                    collector = new Collector(),
+                    Report = require('../lib/report'),
+                    reporter = Report.create('lcov', { dir: coverageDir }),
+                    summary = Report.create('text-summary'),
+                    detail = Report.create('text');
                 fs.readdirSync(coverageDir).forEach(function (file) {
-                    if (file.indexOf('cov') === 0 && file.indexOf('.raw.json') > 0) {
-                        map.merge(JSON.parse(fs.readFileSync(path.resolve(coverageDir, file), 'utf8')));
+                    if (file.indexOf('cov') === 0 && file.indexOf('.json') > 0) {
+                        collector.add(JSON.parse(fs.readFileSync(path.resolve(coverageDir, file), 'utf8')));
                     }
                 });
-                reporter.write(map);
+                reporter.writeReport(collector, true);
+                detail.writeReport(collector, true);
+                summary.writeReport(collector, true);
             });
         }
     });
